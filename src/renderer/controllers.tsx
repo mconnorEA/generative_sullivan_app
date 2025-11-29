@@ -147,6 +147,38 @@ const nodeTypes = {
   workflow: WorkflowNode,
 };
 
+type NodeSpec = {
+  name: string;
+  inputs?: string[];
+  params?: string[];
+  outputs?: string[];
+};
+
+const symmetryNodeSpecs: NodeSpec[] = [
+  {
+    name: 'CircleField',
+    inputs: ['center', 'radius'],
+    params: ['radialCount', 'showPolygon (bool)'],
+    outputs: ['Points (center + perimeter sample points)', 'Lines (rays, diameter lines, polygon edges)'],
+  },
+  {
+    name: 'PolygonField',
+    params: ['sides', 'radius', 'rotation'],
+    outputs: ['Polygon vertices', 'Edges', 'Diagonals'],
+  },
+  {
+    name: 'AxisField',
+    params: ['Number of main axes (N/S/E/W, diagonals, etc.)'],
+    outputs: ['Used for those stacked crosses of squares.'],
+  },
+  {
+    name: 'SymmetryNode',
+    inputs: ['Geometry'],
+    params: ['rotationCount', 'Optional mirror flags'],
+    outputs: ['Geometry replicated around center.'],
+  },
+];
+
 const panelResetMap: Record<WorkflowNodeKind, string[]> = {
   preset: ['step'],
   square: [
@@ -876,6 +908,11 @@ function renderFields(
               onChange={(value) => updateParam('flow.showCross', value)}
             />
           </div>
+          <InfoGroup
+            title="Field / Symmetry nodes (the “energy containers”)"
+            subtitle="These create the basic circle/polygon + radial structure."
+            items={symmetryNodeSpecs}
+          />
         </>
       );
     case 'polygon':
@@ -1109,6 +1146,42 @@ function renderFields(
     default:
       return null;
   }
+}
+
+function InfoGroup({ title, subtitle, items }: { title: string; subtitle?: string; items: NodeSpec[] }) {
+  return (
+    <div className="info-group">
+      <div>
+        <div className="info-group__title">{title}</div>
+        {subtitle && <div className="info-group__subtitle">{subtitle}</div>}
+      </div>
+      <div className="info-group__items">
+        {items.map((item) => (
+          <div key={item.name} className="info-card">
+            <div className="info-card__name">{item.name}</div>
+            <div className="info-card__grid">
+              {item.inputs?.length ? <InfoList title="Inputs" items={item.inputs} /> : null}
+              {item.params?.length ? <InfoList title="Params" items={item.params} /> : null}
+              {item.outputs?.length ? <InfoList title="Outputs" items={item.outputs} /> : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InfoList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="info-list">
+      <div className="info-list__title">{title}</div>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function RangeField({
