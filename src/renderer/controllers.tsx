@@ -158,25 +158,6 @@ const blueprintByKind = nodeBlueprints.reduce<Record<WorkflowNodeKind, NodeBluep
   return map;
 }, {} as Record<WorkflowNodeKind, NodeBlueprint>);
 
-const nodeLibraryEntries = Object.values(blueprintByKind);
-
-const nodeLibraryGroups: NodeLibraryGroup[] = [
-  {
-    title: 'Workflow stages',
-    subtitle: 'Drag or click to add new stages',
-    entries: nodeLibraryEntries.map((entry) => ({ type: 'blueprint', blueprint: entry })),
-  },
-  {
-    title: 'Field / Symmetry nodes (the “energy containers”)',
-    subtitle: 'These create the basic circle/polygon + radial structure.',
-    entries: symmetryNodeSpecs.map((spec) => ({ type: 'spec', spec })),
-  },
-];
-
-const nodeTypes = {
-  workflow: WorkflowNode,
-};
-
 const symmetryNodeSpecs: NodeSpec[] = [
   {
     name: 'CircleField',
@@ -201,6 +182,25 @@ const symmetryNodeSpecs: NodeSpec[] = [
     outputs: ['Geometry replicated around center.'],
   },
 ];
+
+const nodeLibraryEntries = Object.values(blueprintByKind);
+
+const nodeLibraryGroups: NodeLibraryGroup[] = [
+  {
+    title: 'Workflow stages',
+    subtitle: 'Drag or click to add new stages',
+    entries: nodeLibraryEntries.map((entry) => ({ type: 'blueprint', blueprint: entry })),
+  },
+  {
+    title: 'Field / Symmetry nodes (the “energy containers”)',
+    subtitle: 'These create the basic circle/polygon + radial structure.',
+    entries: symmetryNodeSpecs.map((spec) => ({ type: 'spec', spec })),
+  },
+];
+
+const nodeTypes = {
+  workflow: WorkflowNode,
+};
 
 const panelResetMap: Record<WorkflowNodeKind, string[]> = {
   preset: ['step'],
