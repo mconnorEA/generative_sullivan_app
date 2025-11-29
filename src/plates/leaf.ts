@@ -41,6 +41,28 @@ export interface LeafGeometry {
   midrib: Path;
 }
 
+export interface LeafParams {
+  length: number;
+  width: number;
+  tipSharpness: number;
+  baseTaper: number;
+  asymmetry: number;
+  lobes: number;
+  serration: number;
+  curvature: number;
+}
+
+export const defaultLeafParams: LeafParams = {
+  length: 0.4,
+  width: 0.2,
+  tipSharpness: 0.5,
+  baseTaper: 0.5,
+  asymmetry: 0.5,
+  lobes: 0,
+  serration: 0,
+  curvature: 0.2,
+};
+
 const baseProfile: LeafProfile = {
   id: 'ovate',
   widths: [
@@ -159,6 +181,32 @@ export function createLeafNode(params: LeafShapeParams = {}): OrnamentNode {
   };
 }
 
+/**
+ * Linearly blend two simplified parameter sets to drive stem leaves.
+ */
+export function morphLeafParams(a: LeafParams, b: LeafParams, alpha: number): LeafParams {
+  const t = clamp01(alpha);
+  return {
+    length: lerp(a.length, b.length, t),
+    width: lerp(a.width, b.width, t),
+    tipSharpness: lerp(a.tipSharpness, b.tipSharpness, t),
+    baseTaper: lerp(a.baseTaper, b.baseTaper, t),
+    asymmetry: lerp(a.asymmetry, b.asymmetry, t),
+    lobes: lerp(a.lobes, b.lobes, t),
+    serration: lerp(a.serration, b.serration, t),
+    curvature: lerp(a.curvature, b.curvature, t),
+  };
+}
+
+/**
+ * Convenience helper that converts a simplified parameter set into a renderable Path.
+ */
+export function leafToPath(params: LeafParams): Path {
+  const shapeParams = leafParamsToShapeParams(params);
+  const { outline } = createLeafGeometry(shapeParams);
+  return outline;
+}
+
 function buildOutline(config: {
   profile: LeafProfile;
   length: number;
@@ -242,6 +290,36 @@ function shapePinch(t: number, basePull: number, tipPull: number, bias: number):
   const base = 1 - Math.pow(1 - clamp01(basePull), bias + 0.5) * (1 - t) * 0.35;
   const tip = 1 - Math.pow(1 - clamp01(tipPull), bias + 0.5) * t * 0.55;
   return Math.max(0.1, base * tip);
+}
+
+function leafParamsToShapeParams(params: LeafParams): LeafShapeParams {
+  const length = clamp(params.length, 0.1, 1.5);
+  const maxWidth = clamp(params.width, 0.05, 0.8);
+  const curvature = clamp(
+    params.curvature + (clamp01(params.asymmetry) - 0.5) * 0.25,
+    -0.85,
+    0.85
+  );
+  const pullBias = clamp01(0.35 + params.tipSharpness * 0.4 - params.baseTaper * 0.25);
+  const serrationSteps = clamp01(params.serration);
+  return {
+    profile: selectProfileFromParams(params),
+    length,
+    maxWidth,
+    curvature,
+    pullBias,
+    resolution: 48 + Math.round(serrationSteps * 24),
+  };
+}
+
+function selectProfileFromParams(params: LeafParams): LeafProfile {
+  if (params.lobes > 0.65) {
+    return leafProfiles.cordate;
+  }
+  if (params.tipSharpness > 0.6) {
+    return leafProfiles.lanceolate;
+  }
+  return leafProfiles.ovate;
 }
 
 function lerp(a: number, b: number, t: number): number {

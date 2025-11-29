@@ -195,3 +195,14 @@ export function ornamentToSvg(
 
   return svg;
 }
+
+/**
+ * Alias with a name that better matches the higher level "scene" terminology
+ * used in the interactive demos.
+ */
+export function renderSceneToSvg(
+  ornament: OrnamentResult,
+  options: SvgRenderOptions = {}
+): string {
+  return ornamentToSvg(ornament, options);
+}

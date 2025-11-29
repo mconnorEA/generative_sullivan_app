@@ -2,14 +2,19 @@
   "name": "generative-sullivan-ornament",
   "version": "0.1.0",
   "description": "Plate-inspired generative ornament prototype",
-  "main": "dist/index.js",
+  "main": "dist/electron/main.js",
   "scripts": {
-    "build": "tsc",
-    "start": "ts-node src/index.ts",
-    "demo:plate2:leaf": "ts-node src/plate2_leaf_demo.ts"
+    "build": "tsc && npm run build:renderer",
+    "build:renderer": "esbuild src/renderer/controllers.ts src/renderer/preview.ts --bundle --outdir=public --format=iife --platform=browser --sourcemap",
+    "start": "npm run build && electron .",
+    "start:cli": "ts-node src/index.ts",
+    "demo:plate2:leaf": "ts-node src/plate2_leaf_demo.ts",
+    "dev:renderer": "esbuild src/renderer/controllers.ts src/renderer/preview.ts --bundle --outdir=public --format=iife --platform=browser --sourcemap --watch"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/node": "^20.11.30",
+    "electron": "^39.2.4",
+    "esbuild": "^0.27.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }

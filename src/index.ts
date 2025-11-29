@@ -9,6 +9,10 @@ const params: Plate1Params = {
   subdivisions: 4,
   step: 3,
   medallionRadius: 0.5,
+  secondaryAxisPairs: 2,
+  stemCount: 6,
+  stemLength: 0.8,
+  symmetryBias: 0.2,
 };
 
 const ornament = generatePlate1(width, height, params);

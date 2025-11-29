@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sullivan Controls</title>
+    <style>
+      :root {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        --bg: #050b16;
+        --panel: #0f1b2f;
+        --border: #1f2c45;
+        --text-strong: #f3f6ff;
+        --text-muted: #98a6c7;
+        --accent: #7ce6ff;
+        --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+        color: var(--text-strong);
+        background: var(--bg);
+      }
+
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--text-strong);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+
+      .flow {
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        background: rgba(15, 27, 47, 0.8);
+        padding: 1rem 1.1rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .flow h2 {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .flow-tools {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .flow-step {
+        border: 1px solid var(--border);
+        border-radius: 0.85rem;
+        padding: 0.85rem;
+        background: rgba(7, 14, 26, 0.75);
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      .flow-step h3 {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .inline-toggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.85rem;
+      }
+
+      .inline-toggles .toggle {
+        font-size: 0.85rem;
+      }
+
+      .control select {
+        grid-column: 1 / -1;
+        width: 100%;
+        padding: 0.45rem 0.6rem;
+        border-radius: 0.6rem;
+        background: rgba(10, 18, 34, 0.85);
+        border: 1px solid var(--border);
+        color: var(--text-strong);
+      }
+
+      .controls {
+        padding: 1.25rem;
+        border-radius: 1rem;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .group {
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+        background: rgba(10, 18, 34, 0.65);
+      }
+
+      .group h2 {
+        margin: 0 0 0.5rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+
+      .control {
+        display: grid;
+        grid-template-columns: 1fr 80px;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .control + .control {
+        margin-top: 1rem;
+      }
+
+      .control label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.35rem;
+        color: var(--text-strong);
+      }
+
+      .control input[type='range'] {
+        grid-column: 1 / -1;
+        width: 100%;
+        accent-color: var(--accent);
+      }
+
+      .value {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .toggle-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.65rem 1.35rem;
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+
+      .toggle input {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="flow" aria-label="Generative flow">
+        <h2>Flow Builder</h2>
+        <div class="flow-tools">
+          <article class="flow-step" aria-label="Step 1 circle">
+            <h3>Step 1 · Circle & Perimeter</h3>
+            <div class="control">
+              <label for="circleRadius">Circle radius</label>
+              <span class="value" data-value-for="circleRadius">0.72</span>
+              <input id="circleRadius" type="range" min="0.3" max="0.95" value="0.72" step="0.01" />
+            </div>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="showBaseCircle" type="checkbox" checked />
+                <span>Show circle</span>
+              </label>
+              <label class="toggle">
+                <input id="showCross" type="checkbox" checked />
+                <span>Show cross</span>
+              </label>
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Step 2 polygon">
+            <h3>Step 2 · Polygon Dividers</h3>
+            <div class="control">
+              <label for="polygonSides">Polygon sides</label>
+              <span class="value" data-value-for="polygonSides">6</span>
+              <input id="polygonSides" type="range" min="3" max="12" value="6" step="1" />
+            </div>
+            <div class="control">
+              <label for="polygonRotation">Rotation (°)</label>
+              <span class="value" data-value-for="polygonRotation">0°</span>
+              <input id="polygonRotation" type="range" min="0" max="90" value="0" step="1" />
+            </div>
+            <div class="control">
+              <label for="radialMultiplier">Radial density</label>
+              <span class="value" data-value-for="radialMultiplier">1×</span>
+              <input id="radialMultiplier" type="range" min="1" max="4" value="1" step="1" />
+            </div>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="showPolygon" type="checkbox" />
+                <span>Show polygon</span>
+              </label>
+              <label class="toggle">
+                <input id="showRadials" type="checkbox" />
+                <span>Show radials</span>
+              </label>
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Step 3 energy lines">
+            <h3>Step 3 · Energy Lines</h3>
+            <div class="control">
+              <label for="pushAmount">Push amount</label>
+              <span class="value" data-value-for="pushAmount">0.00</span>
+              <input id="pushAmount" type="range" min="0" max="1" value="0" step="0.01" />
+            </div>
+            <div class="control">
+              <label for="pullAmount">Pull amount</label>
+              <span class="value" data-value-for="pullAmount">0.00</span>
+              <input id="pullAmount" type="range" min="0" max="1" value="0" step="0.01" />
+            </div>
+            <div class="control">
+              <label for="pushMotif">Push motif</label>
+              <select id="pushMotif">
+                <option value="square">Square</option>
+                <option value="diamond" selected>Diamond</option>
+                <option value="lobe">Lobe</option>
+                <option value="pyramid">Pyramid</option>
+              </select>
+            </div>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="enablePush" type="checkbox" />
+                <span>Push outward</span>
+              </label>
+              <label class="toggle">
+                <input id="enablePull" type="checkbox" />
+                <span>Pull inward</span>
+              </label>
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Step 4 sub centers">
+            <h3>Step 4 · Sub-centers</h3>
+            <div class="control">
+              <label for="subCenterDepth">Recursion depth</label>
+              <span class="value" data-value-for="subCenterDepth">0</span>
+              <input id="subCenterDepth" type="range" min="0" max="3" value="0" step="1" />
+            </div>
+            <div class="control">
+              <label for="subCenterRadius">Sub-center radius</label>
+              <span class="value" data-value-for="subCenterRadius">0.30</span>
+              <input id="subCenterRadius" type="range" min="0.1" max="0.6" value="0.3" step="0.01" />
+            </div>
+            <div class="control">
+              <label for="subCenterSides">Sub-center sides</label>
+              <span class="value" data-value-for="subCenterSides">4</span>
+              <input id="subCenterSides" type="range" min="3" max="8" value="4" step="1" />
+            </div>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="radiateSubCenters" type="checkbox" />
+                <span>Radiate from each center</span>
+              </label>
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Node decoration">
+            <h3>Node Decoration</h3>
+            <div class="control">
+              <label for="nodeDecorationType">Decoration type</label>
+              <select id="nodeDecorationType">
+                <option value="none" selected>None</option>
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+                <option value="petal">Petal</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="nodeSize">Node size</label>
+              <span class="value" data-value-for="nodeSize">0.18</span>
+              <input id="nodeSize" type="range" min="0.05" max="0.5" value="0.18" step="0.01" />
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Line diamonds">
+            <h3>Line Diamonds</h3>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="lineDiamondsEnabled" type="checkbox" />
+                <span>Enable</span>
+              </label>
+            </div>
+            <div class="control">
+              <label for="lineDiamondWidth">Short axis size</label>
+              <span class="value" data-value-for="lineDiamondWidth">0.20</span>
+              <input id="lineDiamondWidth" type="range" min="0.05" max="0.6" value="0.2" step="0.01" />
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Edge decoration">
+            <h3>Edge Ornament</h3>
+            <div class="control">
+              <label for="edgeDecorationStyle">Edge style</label>
+              <select id="edgeDecorationStyle">
+                <option value="straight" selected>Straight</option>
+                <option value="arched">Arched</option>
+                <option value="double">Double line</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="edgeBulge">Bulge / band</label>
+              <span class="value" data-value-for="edgeBulge">0.30</span>
+              <input id="edgeBulge" type="range" min="0" max="1" value="0.3" step="0.01" />
+            </div>
+            <div class="control">
+              <label for="edgeRepeat">Repeat count</label>
+              <span class="value" data-value-for="edgeRepeat">0</span>
+              <input id="edgeRepeat" type="range" min="0" max="8" value="0" step="1" />
+            </div>
+          </article>
+
+          <article class="flow-step" aria-label="Layering">
+            <h3>Line & Layers</h3>
+            <div class="control">
+              <label for="lineWeight">Line weight</label>
+              <span class="value" data-value-for="lineWeight">1.40</span>
+              <input id="lineWeight" type="range" min="0.4" max="4" value="1.4" step="0.1" />
+            </div>
+            <div class="inline-toggles">
+              <label class="toggle">
+                <input id="showStructuralLayer" type="checkbox" checked />
+                <span>Structural layer</span>
+              </label>
+              <label class="toggle">
+                <input id="showOrnamentLayer" type="checkbox" checked />
+                <span>Ornament layer</span>
+              </label>
+            </div>
+          </article>
+        </div>
+      </section>
+      <input id="loadPresetInput" type="file" accept="application/json" hidden />
+      <section class="controls">
+        <div class="group">
+          <div class="control">
+            <label for="step">Plate Step Preset</label>
+            <span class="value" data-value-for="step">7</span>
+            <input id="step" type="range" min="0" max="7" value="7" step="1" />
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>Motifs</h2>
+          <div class="toggle-list">
+            <label class="toggle">
+              <input id="showOuterFrame" type="checkbox" checked />
+              <span>Outer frame</span>
+            </label>
+            <label class="toggle">
+              <input id="showInnerFrame" type="checkbox" checked />
+              <span>Inner frame</span>
+            </label>
+            <label class="toggle">
+              <input id="showCenterCross" type="checkbox" checked />
+              <span>Center cross</span>
+            </label>
+            <label class="toggle">
+              <input id="showDiagonals" type="checkbox" checked />
+              <span>Diagonals</span>
+            </label>
+            <label class="toggle">
+              <input id="showSubdivisionGrid" type="checkbox" checked />
+              <span>Subdivision grid</span>
+            </label>
+            <label class="toggle">
+              <input id="showInscribedCircle" type="checkbox" checked />
+              <span>Inscribed circle</span>
+            </label>
+            <label class="toggle">
+              <input id="showDiamondSquare" type="checkbox" checked />
+              <span>Diamond square</span>
+            </label>
+            <label class="toggle">
+              <input id="showQuarterArcs" type="checkbox" checked />
+              <span>Quarter arcs</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="control">
+            <label for="innerMargin">Inner margin</label>
+            <span class="value" data-value-for="innerMargin">0.18</span>
+            <input id="innerMargin" type="range" min="0" max="0.9" value="0.18" step="0.01" />
+          </div>
+          <div class="control">
+            <label for="subdivisions">Subdivisions</label>
+            <span class="value" data-value-for="subdivisions">6</span>
+            <input id="subdivisions" type="range" min="2" max="12" value="6" step="1" />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="control">
+            <label for="leafMorph">Leaf Morph</label>
+            <span class="value" data-value-for="leafMorph">0.35</span>
+            <input id="leafMorph" type="range" min="0" max="1" value="0.35" step="0.01" />
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="./controllers.js" defer></script>
+  </body>
+</html>
+

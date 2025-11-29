@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sullivan Preview</title>
+    <style>
+      :root {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        --bg: #030814;
+        --panel: #0f1829;
+        --border: #1f2f4b;
+        --text-strong: #f3f5ff;
+        --text-muted: #94a3c7;
+        --shadow: 0 35px 60px rgba(0, 0, 0, 0.45);
+        color: var(--text-strong);
+        background: var(--bg);
+      }
+
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--text-strong);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .panel {
+        padding: 1.25rem;
+        border-radius: 1.25rem;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .panel h2 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .preview-canvas {
+        background: radial-gradient(circle at 50% 0%, rgba(124, 230, 255, 0.1), transparent 70%);
+        border-radius: 0.85rem;
+        padding: 0.25rem;
+        position: relative;
+        overflow: hidden;
+        min-height: 520px;
+      }
+
+      .flow-viewport {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: center center;
+        transition: transform 160ms ease;
+      }
+
+      #flow-svg svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .zoom-controls {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        display: flex;
+        gap: 0.35rem;
+        background: rgba(3, 8, 20, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 0.3rem 0.45rem;
+        box-shadow: 0 18px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .zoom-button {
+        appearance: none;
+        border: none;
+        background: transparent;
+        color: var(--text-strong);
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 130ms ease, color 130ms ease;
+      }
+
+      .zoom-button:hover {
+        background: rgba(124, 230, 255, 0.18);
+        color: #fff;
+      }
+
+      .zoom-button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .zoom-button svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h2>Flow Builder</h2>
+        <div id="flow-preview" class="preview-canvas">
+          <div id="flow-viewport" class="flow-viewport">
+            <div id="flow-svg"></div>
+          </div>
+          <div class="zoom-controls" aria-label="Zoom controls">
+            <button id="zoom-in" class="zoom-button" type="button" title="Zoom in" aria-label="Zoom in">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M11 5v6H5v2h6v6h2v-6h6v-2h-6V5z" />
+              </svg>
+            </button>
+            <button id="zoom-out" class="zoom-button" type="button" title="Zoom out" aria-label="Zoom out">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 11v2h14v-2H5z" />
+              </svg>
+            </button>
+            <button id="zoom-fit" class="zoom-button" type="button" title="Fit to view" aria-label="Fit to view">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 9V4h5v2H6v3H4zm15-3h-3V4h5v5h-2V6zM4 15h2v3h3v2H4v-5zm13 3h3v-3h2v5h-5v-2z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="./preview.js" defer></script>
+  </body>
+</html>
+
