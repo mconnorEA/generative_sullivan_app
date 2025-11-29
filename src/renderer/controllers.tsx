@@ -578,6 +578,12 @@ function App(): JSX.Element {
       .catch(() => {
         /* ignore */
       });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const dispose = window.controllersAPI?.onMenuCommand((command) => {
       if (!command) {
         return;
@@ -596,10 +602,7 @@ function App(): JSX.Element {
           break;
       }
     });
-    return () => {
-      mounted = false;
-      dispose?.();
-    };
+    return () => dispose?.();
   }, [openWorkflow, saveWorkflow, exportSvg]);
 
   useEffect(() => {
