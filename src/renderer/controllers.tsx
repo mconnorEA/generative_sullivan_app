@@ -52,6 +52,23 @@ type NodeBlueprint = {
   position: { x: number; y: number };
 };
 
+type NodeSpec = {
+  name: string;
+  inputs?: string[];
+  params?: string[];
+  outputs?: string[];
+};
+
+type NodeLibraryEntry =
+  | { type: 'blueprint'; blueprint: NodeBlueprint }
+  | { type: 'spec'; spec: NodeSpec };
+
+type NodeLibraryGroup = {
+  title: string;
+  subtitle?: string;
+  entries: NodeLibraryEntry[];
+};
+
 const nodeBlueprints: NodeBlueprint[] = [
   {
     id: 'stage-preset',
@@ -143,15 +160,21 @@ const blueprintByKind = nodeBlueprints.reduce<Record<WorkflowNodeKind, NodeBluep
 
 const nodeLibraryEntries = Object.values(blueprintByKind);
 
+const nodeLibraryGroups: NodeLibraryGroup[] = [
+  {
+    title: 'Workflow stages',
+    subtitle: 'Drag or click to add new stages',
+    entries: nodeLibraryEntries.map((entry) => ({ type: 'blueprint', blueprint: entry })),
+  },
+  {
+    title: 'Field / Symmetry nodes (the “energy containers”)',
+    subtitle: 'These create the basic circle/polygon + radial structure.',
+    entries: symmetryNodeSpecs.map((spec) => ({ type: 'spec', spec })),
+  },
+];
+
 const nodeTypes = {
   workflow: WorkflowNode,
-};
-
-type NodeSpec = {
-  name: string;
-  inputs?: string[];
-  params?: string[];
-  outputs?: string[];
 };
 
 const symmetryNodeSpecs: NodeSpec[] = [
@@ -725,7 +748,12 @@ function App(): JSX.Element {
           </div>
         </aside>
       </main>
-      <NodeLibrary open={isLibraryOpen} nodes={nodeLibraryEntries} onClose={() => setLibraryOpen(false)} onAdd={handleAddFromLibrary} />
+      <NodeLibrary
+        open={isLibraryOpen}
+        groups={nodeLibraryGroups}
+        onClose={() => setLibraryOpen(false)}
+        onAdd={handleAddFromLibrary}
+      />
     </div>
   );
 }
@@ -769,12 +797,12 @@ function PropertyPanel({
 
 interface NodeLibraryProps {
   open: boolean;
-  nodes: NodeBlueprint[];
+  groups: NodeLibraryGroup[];
   onClose: () => void;
   onAdd: (kind: WorkflowNodeKind) => void;
 }
 
-function NodeLibrary({ open, nodes, onClose, onAdd }: NodeLibraryProps) {
+function NodeLibrary({ open, groups, onClose, onAdd }: NodeLibraryProps) {
   const dragStart = (event: React.DragEvent<HTMLDivElement>, kind: WorkflowNodeKind) => {
     event.dataTransfer.setData('application/workflow-kind', kind);
     event.dataTransfer.effectAllowed = 'move';
@@ -794,23 +822,50 @@ function NodeLibrary({ open, nodes, onClose, onAdd }: NodeLibraryProps) {
           </button>
         </div>
         <div className="node-library__list">
-          {nodes.map((node) => (
-            <div
-              key={node.kind}
-              className="node-library__item"
-              draggable
-              onDragStart={(event) => dragStart(event, node.kind)}
-            >
-              <div className="node-library__icon" style={{ color: node.tint }}>
-                {node.icon}
+          {groups.map((group) => (
+            <div key={group.title} className="node-library__group">
+              <div className="node-library__group-hdr">
+                <div className="node-library__group-title">{group.title}</div>
+                {group.subtitle ? <div className="node-library__group-subtitle">{group.subtitle}</div> : null}
               </div>
-              <div className="node-library__meta">
-                <div className="node-library__name">{node.title}</div>
-                {node.subtitle && <div className="node-library__hint">{node.subtitle}</div>}
+              <div className="node-library__items">
+                {group.entries.map((entry) => {
+                  if (entry.type === 'blueprint') {
+                    const node = entry.blueprint;
+                    return (
+                      <div
+                        key={node.kind}
+                        className="node-library__item"
+                        draggable
+                        onDragStart={(event) => dragStart(event, node.kind)}
+                      >
+                        <div className="node-library__icon" style={{ color: node.tint }}>
+                          {node.icon}
+                        </div>
+                        <div className="node-library__meta">
+                          <div className="node-library__name">{node.title}</div>
+                          {node.subtitle && <div className="node-library__hint">{node.subtitle}</div>}
+                        </div>
+                        <button className="btn btn--small" onClick={() => onAdd(node.kind)}>
+                          Add
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  const { spec } = entry;
+                  return (
+                    <div key={spec.name} className="node-library__spec">
+                      <div className="node-library__spec-name">{spec.name}</div>
+                      <div className="node-library__spec-grid">
+                        {spec.inputs?.length ? <InfoList title="Inputs" items={spec.inputs} /> : null}
+                        {spec.params?.length ? <InfoList title="Params" items={spec.params} /> : null}
+                        {spec.outputs?.length ? <InfoList title="Outputs" items={spec.outputs} /> : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <button className="btn btn--small" onClick={() => onAdd(node.kind)}>
-                Add
-              </button>
             </div>
           ))}
         </div>
