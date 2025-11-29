@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, Menu, MenuItemConstructorOptions, dialog }
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ControllerParams, defaultControllerParams } from '../types/controls';
+import { WorkflowFilePayload } from '../types/workflow';
 
 let controllerWindow: BrowserWindow | null = null;
 let previewWindow: BrowserWindow | null = null;
@@ -9,9 +10,9 @@ let currentParams: ControllerParams = { ...defaultControllerParams };
 
 function createControllerWindow(): void {
   controllerWindow = new BrowserWindow({
-    width: 420,
-    height: 760,
-    resizable: false,
+    width: 1280,
+    height: 860,
+    resizable: true,
     title: 'Sullivan Controls',
     webPreferences: {
       preload: path.join(__dirname, 'preloadControllers.js'),
@@ -60,17 +61,17 @@ function buildMenu(): void {
     label: 'File',
     submenu: [
       {
-        label: 'Save Settings',
-        accelerator: 'CmdOrCtrl+S',
-        click: () => sendControllerCommand('savePreset'),
-      },
-      {
-        label: 'Load Settings',
+        label: 'Open Workflow…',
         accelerator: 'CmdOrCtrl+O',
-        click: () => handleLoadPresetFromMenu(),
+        click: () => sendControllerCommand('openWorkflow'),
       },
       {
-        label: 'Export SVG',
+        label: 'Save Workflow…',
+        accelerator: 'CmdOrCtrl+S',
+        click: () => sendControllerCommand('saveWorkflow'),
+      },
+      {
+        label: 'Export Current SVG',
         accelerator: 'CmdOrCtrl+Shift+E',
         click: () => sendControllerCommand('exportSvg'),
       },
@@ -122,22 +123,32 @@ ipcMain.handle('controller:export-svg', async () => {
   return previewWindow.webContents.executeJavaScript('window.exportCurrentSvg?.() ?? ""', true);
 });
 
-async function handleLoadPresetFromMenu(): Promise<void> {
-  const result = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    filters: [{ name: 'JSON', extensions: ['json'] }],
+ipcMain.handle('workflow:save', async (_event, payload: WorkflowFilePayload) => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: 'Save Workflow',
+    defaultPath: 'workflow.json',
+    filters: [{ name: 'Workflow', extensions: ['json'] }],
   });
-  if (result.canceled || !result.filePaths.length) {
-    return;
+  if (canceled || !filePath) {
+    return { canceled: true };
   }
-  try {
-    const filePath = result.filePaths[0];
-    const data = await fs.readFile(filePath, 'utf8');
-    sendControllerCommand('loadPresetContent', data);
-  } catch {
-    // ignore errors
+  await fs.writeFile(filePath, JSON.stringify(payload, null, 2), 'utf8');
+  return { canceled: false, filePath };
+});
+
+ipcMain.handle('workflow:open', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'Workflow', extensions: ['json'] }],
+  });
+  if (canceled || !filePaths?.length) {
+    return { canceled: true };
   }
-}
+  const filePath = filePaths[0];
+  const raw = await fs.readFile(filePath, 'utf8');
+  const data = JSON.parse(raw) as WorkflowFilePayload;
+  return { canceled: false, filePath, data };
+});
 
 function sendControllerCommand(action: string, payload?: string): void {
   if (controllerWindow) {

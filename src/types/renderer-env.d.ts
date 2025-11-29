@@ -1,4 +1,5 @@
 import { ControllerParams } from './controls';
+import { WorkflowFileDialogResult, WorkflowFileOpenResult, WorkflowFilePayload } from './workflow';
 
 interface ControllerMenuCommand {
   action: string;
@@ -9,7 +10,9 @@ interface ControllersBridge {
   requestState(): Promise<ControllerParams>;
   updateState(params: ControllerParams): void;
   requestCurrentSvg(): Promise<string>;
-  onMenuCommand(callback: (command: ControllerMenuCommand) => void): void;
+  saveWorkflow(payload: WorkflowFilePayload): Promise<WorkflowFileDialogResult>;
+  openWorkflow(): Promise<WorkflowFileOpenResult>;
+  onMenuCommand(callback: (command: ControllerMenuCommand) => void): () => void;
 }
 
 interface PreviewBridge {
