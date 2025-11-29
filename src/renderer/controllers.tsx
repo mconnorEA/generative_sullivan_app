@@ -893,6 +893,9 @@ function renderFields(
             max={90}
             step={1}
             onChange={(value) => updateParam('flow.polygonRotation', Math.round(value))}
+            onShiftSnap={(value) =>
+              snapRotationToSymmetry(value, params.flow.polygonSides, params.flow.radialMultiplier, 0, 90)
+            }
             format={(value) => `${value}°`}
           />
           <RangeField
@@ -1113,6 +1116,7 @@ function RangeField({
   step,
   onChange,
   format,
+  onShiftSnap,
 }: {
   label: string;
   value: number;
@@ -1121,14 +1125,49 @@ function RangeField({
   step: number;
   onChange: (value: number) => void;
   format?: (value: number) => string;
+  onShiftSnap?: (value: number) => number;
 }) {
+  const [shiftPressed, setShiftPressed] = useState(false);
+
+  useEffect(() => {
+    if (!onShiftSnap) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setShiftPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [!!onShiftSnap]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = parseFloat(event.target.value);
+    const nextValue = onShiftSnap && shiftPressed ? onShiftSnap(rawValue) : rawValue;
+    onChange(nextValue);
+  };
+
   return (
     <div className="field field--range">
       <div className="field__label">
         <span>{label}</span>
         <span className="field__value">{format ? format(value) : value}</span>
       </div>
-      <input type="range" value={value} min={min} max={max} step={step} onChange={(e) => onChange(parseFloat(e.target.value))} />
+      <input type="range" value={value} min={min} max={max} step={step} onChange={handleChange} />
     </div>
   );
 }
@@ -1235,6 +1274,23 @@ function summarizeNode(kind: WorkflowNodeKind, params: ControllerParams): string
   }
   const result = builder(params);
   return Array.isArray(result) ? result : [];
+}
+
+function snapRotationToSymmetry(
+  value: number,
+  sides: number,
+  radialMultiplier: number,
+  min: number,
+  max: number
+): number {
+  const axisCount = Math.max(1, Math.round(sides * radialMultiplier));
+  const increment = 360 / axisCount;
+  const snapped = Math.round(value / increment) * increment;
+  return clamp(snapped, min, max);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
 
 function countToggled(square: ControllerParams['square']): number {

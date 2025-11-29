@@ -318,6 +318,29 @@ body {
   display: none;
 }
 
+.react-flow__handle {
+  min-width: 10px;
+  min-height: 10px;
+  width: 12px;
+  height: 12px;
+}
+
+.react-flow__handle-left {
+  left: -8px;
+}
+
+.react-flow__handle-right {
+  right: -8px;
+}
+
+.react-flow__handle-top {
+  top: -8px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -8px;
+}
+
 .node-fab {
   position: absolute;
   top: 72px;
