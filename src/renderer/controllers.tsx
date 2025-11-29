@@ -5,6 +5,7 @@ import ReactFlow, {
   BackgroundVariant,
   Controls,
   MiniMap,
+  Panel,
   Handle,
   Position,
   ReactFlowInstance,
@@ -631,13 +632,6 @@ function App(): JSX.Element {
         <ActionButton label="Run" onClick={runWorkflow} />
         <ActionButton label="Export SVG" onClick={exportSvg} />
       </header>
-      <button
-        className={`node-fab${isLibraryOpen ? ' node-fab--active' : ''}`}
-        aria-label="Toggle node library"
-        onClick={() => setLibraryOpen((open) => !open)}
-      >
-        +
-      </button>
       <main className="workflow-main">
         <div className="canvas" ref={flowWrapperRef}>
           {!hasNodes && (
@@ -670,6 +664,15 @@ function App(): JSX.Element {
             onDragOver={onDragOver}
             defaultEdgeOptions={{ type: 'default' }}
           >
+            <Panel position="top-right" className="node-fab__panel">
+              <button
+                className={`node-fab${isLibraryOpen ? ' node-fab--active' : ''}`}
+                aria-label="Toggle node library"
+                onClick={() => setLibraryOpen((open) => !open)}
+              >
+                +
+              </button>
+            </Panel>
             <Controls />
             <MiniMap pannable zoomable />
             <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
