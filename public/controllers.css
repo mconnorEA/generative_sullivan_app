@@ -341,6 +341,48 @@ body {
   bottom: -8px;
 }
 
+.react-flow__controls {
+  background: rgba(10, 18, 34, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.react-flow__controls-button:hover {
+  background: rgba(124, 230, 255, 0.1);
+  color: var(--accent);
+}
+
+.react-flow__controls-button svg {
+  stroke: currentColor;
+}
+
+.react-flow__minimap {
+  background: rgba(6, 10, 20, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(8, 14, 27, 0.85);
+  stroke: var(--line);
+}
+
+.react-flow__minimap-node {
+  fill: rgba(124, 230, 255, 0.18);
+  stroke: var(--accent);
+}
+
 .node-fab {
   position: absolute;
   top: 72px;
