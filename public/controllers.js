@@ -32331,6 +32331,11 @@
         setParams(state);
       }).catch(() => {
       });
+      return () => {
+        mounted = false;
+      };
+    }, []);
+    (0, import_react7.useEffect)(() => {
       const dispose = window.controllersAPI?.onMenuCommand((command) => {
         if (!command) {
           return;
@@ -32349,10 +32354,7 @@
             break;
         }
       });
-      return () => {
-        mounted = false;
-        dispose?.();
-      };
+      return () => dispose?.();
     }, [openWorkflow, saveWorkflow, exportSvg]);
     (0, import_react7.useEffect)(() => {
       updateNodeSummaries(params);
