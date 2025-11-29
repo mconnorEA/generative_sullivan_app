@@ -495,7 +495,35 @@ body {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+}
+
+.node-library__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.node-library__group-hdr {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.node-library__group-title {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.node-library__group-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.node-library__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
 .node-library__item {
@@ -528,6 +556,27 @@ body {
 
 .node-library__name {
   font-weight: 600;
+}
+
+.node-library__spec {
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 0.85rem;
+  background: rgba(6, 10, 18, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.node-library__spec-name {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.node-library__spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.6rem;
 }
 
 .btn--small {
