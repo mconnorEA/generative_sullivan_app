@@ -430,11 +430,11 @@ function App(): JSX.Element {
     [setNodes]
   );
 
-  const pushSnapshot = useCallback(() => {
+  const pushSnapshot = useCallback((): void => {
     const snapshot = getSnapshot();
     setUndo((stack) => stack.concat([snapshot]));
     setRedo([]);
-  }, [getSnapshot, updateParam]);
+  }, [getSnapshot]);
 
   const applyParams = useCallback(
     (mutator: (draft: ControllerParams) => void) => {
