@@ -405,38 +405,43 @@ body {
 }
 
 .polygon-node__port {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  justify-content: space-between;
+  gap: 0.45rem;
+  padding: 0.25rem 1.2rem;
+  justify-content: flex-start;
 }
 
 .polygon-node__port-label {
   font-size: 0.75rem;
   color: var(--muted);
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.polygon-node__port--input {
-  justify-content: flex-start;
-}
-
-.polygon-node__port--input .polygon-node__port-label {
-  text-align: left;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .polygon-node__port--output {
   justify-content: flex-end;
-}
-
-.polygon-node__port--output .polygon-node__port-label {
+  padding-left: 0.6rem;
   text-align: right;
 }
 
-.polygon-node__port .react-flow__handle {
-  position: static;
-  transform: none;
+.polygon-node__port--input {
+  padding-right: 0.6rem;
+}
+
+.polygon-node__handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.polygon-node__handle--input {
+  left: -10px;
+}
+
+.polygon-node__handle--output {
+  right: -10px;
 }
 
 .help {
