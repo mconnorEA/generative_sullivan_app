@@ -36,9 +36,31 @@ type WorkflowNodeData = {
   summary: string[];
 };
 
+type PolygonFieldNodeData = WorkflowNodeData & {
+  type: 'polygon-field';
+  params: {
+    sides: number;
+    radius: number;
+    rotation: number;
+    radialMultiplier: number;
+    showPolygon: boolean;
+    showRadials: boolean;
+  };
+  onChange: {
+    sides: (value: number) => void;
+    radius: (value: number) => void;
+    rotation: (value: number) => void;
+    radialMultiplier: (value: number) => void;
+    showPolygon: (value: boolean) => void;
+    showRadials: (value: boolean) => void;
+  };
+};
+
+type NodeData = WorkflowNodeData | PolygonFieldNodeData;
+
 type WorkflowSnapshot = {
   params: ControllerParams;
-  nodes: Node<WorkflowNodeData>[];
+  nodes: Node<NodeData>[];
   edges: Edge[];
 };
 
@@ -159,6 +181,7 @@ const nodeLibraryGroups: NodeLibraryGroup[] = [
 
 const nodeTypes = {
   workflow: WorkflowNode,
+  polygonField: PolygonFieldNode,
 };
 
 const panelResetMap: Record<WorkflowNodeKind, string[]> = {
@@ -262,11 +285,100 @@ function WorkflowNode({ data }: { data: WorkflowNodeData }) {
   );
 }
 
+function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
+  const { params, onChange } = data;
+  const snapRotation = useCallback(
+    (value: number) => snapRotationToSymmetry(value, params.sides, 1, 0, 360),
+    [params.sides]
+  );
+
+  return (
+    <>
+      <div className="node-card node-card--polygon" style={{ borderColor: data.tint }}>
+        <div className="node-card__hdr" style={{ background: `${data.tint}22` }}>
+          <span className="node-card__icon" style={{ color: data.tint }}>
+            {data.icon}
+          </span>
+          <div className="node-card__meta">
+            <div className="node-card__title">{data.title}</div>
+            {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
+          </div>
+        </div>
+        <div className="node-card__body">
+          <div className="polygon-node__controls">
+            <RangeField
+              label="Sides"
+              value={params.sides}
+              min={3}
+              max={18}
+              step={1}
+              onChange={(value) => onChange.sides(Math.round(value))}
+            />
+            <RangeField
+              label="Radius"
+              value={params.radius}
+              min={0.25}
+              max={0.95}
+              step={0.01}
+              onChange={(value) => onChange.radius(parseFloat(value.toFixed(2)))}
+              format={(value) => value.toFixed(2)}
+            />
+            <RangeField
+              label="Rotation"
+              value={params.rotation}
+              min={0}
+              max={360}
+              step={1}
+              onChange={(value) => onChange.rotation(Math.round(value))}
+              onShiftSnap={snapRotation}
+              format={(value) => `${value}°`}
+            />
+            <RangeField
+              label="Radial multiplier"
+              value={params.radialMultiplier}
+              min={1}
+              max={6}
+              step={1}
+              onChange={(value) => onChange.radialMultiplier(Math.round(value))}
+              format={(value) => `×${value}`}
+            />
+            <ToggleField
+              label="Show polygon"
+              checked={params.showPolygon}
+              onChange={onChange.showPolygon}
+            />
+            <ToggleField
+              label="Show radial lines"
+              checked={params.showRadials}
+              onChange={onChange.showRadials}
+            />
+          </div>
+          <div className="polygon-node__outputs" aria-label="Polygon outputs">
+            <div className="polygon-node__port">
+              <span>polygonVertices</span>
+              <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '55%' }} />
+            </div>
+            <div className="polygon-node__port">
+              <span>edges</span>
+              <Handle type="source" position={Position.Right} id="edges" style={{ top: '70%' }} />
+            </div>
+            <div className="polygon-node__port">
+              <span>radials</span>
+              <Handle type="source" position={Position.Right} id="radials" style={{ top: '85%' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <Handle type="target" position={Position.Left} id="polygon-field-input" />
+    </>
+  );
+}
+
 function App(): JSX.Element {
   const initialNodes = useMemo(() => buildInitialNodes(defaultControllerParams), []);
   const initialEdges = useMemo(() => buildInitialEdges(), []);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeData>(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [params, setParams] = useState<ControllerParams>(defaultControllerParams);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -293,13 +405,26 @@ function App(): JSX.Element {
   const updateNodeSummaries = useCallback(
     (nextParams: ControllerParams) => {
       setNodes((current) =>
-        current.map((node) => ({
-          ...node,
-          data: {
-            ...node.data,
-            summary: summarizeNode(node.data.kind, nextParams),
-          },
-        }))
+        current.map((node) => {
+          if (node.type === 'polygonField') {
+            const data = node.data as PolygonFieldNodeData;
+            return {
+              ...node,
+              data: {
+                ...data,
+                params: extractPolygonParams(nextParams),
+                summary: summarizeNode(node.data.kind, nextParams),
+              },
+            };
+          }
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              summary: summarizeNode(node.data.kind, nextParams),
+            },
+          };
+        })
       );
     },
     [setNodes]
@@ -309,7 +434,7 @@ function App(): JSX.Element {
     const snapshot = getSnapshot();
     setUndo((stack) => stack.concat([snapshot]));
     setRedo([]);
-  }, [getSnapshot]);
+  }, [getSnapshot, updateParam]);
 
   const applyParams = useCallback(
     (mutator: (draft: ControllerParams) => void) => {
@@ -375,12 +500,12 @@ function App(): JSX.Element {
               y: flowWrapperRef.current.clientHeight / 2,
             })
           : { x: 200, y: 200 });
-      const node = createNode(kind, params, { position: targetPosition });
+      const node = createNode(kind, params, { position: targetPosition, updateParam });
       setNodes((nds) => nds.concat(node));
       setSelectedId(node.id);
       setStatus(`Added ${node.data.title}`);
     },
-    [params, pushSnapshot, reactFlowInstance]
+    [params, pushSnapshot, reactFlowInstance, updateParam]
   );
 
   const handleAddFromLibrary = useCallback(
@@ -506,7 +631,11 @@ function App(): JSX.Element {
     if (payload.nodes?.length) {
       setNodes(
         payload.nodes.map((node) =>
-          createNode(node.kind, payload.params, { id: node.id, position: cloneDeep(node.position) })
+          createNode(node.kind, payload.params, {
+            id: node.id,
+            position: cloneDeep(node.position),
+            updateParam,
+          })
         )
       );
     } else {
@@ -725,7 +854,7 @@ function PropertyPanel({
   updateStep,
   resetNode,
 }: {
-  node: Node<WorkflowNodeData> | null;
+  node: Node<NodeData> | null;
   params: ControllerParams;
   updateParam: (path: string, value: boolean | number | string) => void;
   updateStep: (value: number) => void;
@@ -1278,7 +1407,7 @@ function ActionButton({
   );
 }
 
-function buildInitialNodes(_: ControllerParams): Node<WorkflowNodeData>[] {
+function buildInitialNodes(_: ControllerParams): Node<NodeData>[] {
   return [];
 }
 
@@ -1289,10 +1418,38 @@ function buildInitialEdges(): Edge[] {
 function createNode(
   kind: WorkflowNodeKind,
   params: ControllerParams,
-  options?: { id?: string; position?: XYPosition }
-): Node<WorkflowNodeData> {
+  options?: { id?: string; position?: XYPosition; updateParam?: (path: string, value: boolean | number | string) => void }
+): Node<NodeData> {
   const template = blueprintByKind[kind];
   const position = options?.position ?? { ...(template?.position ?? { x: 0, y: 0 }) };
+
+  if (kind === 'polygon') {
+    const polygonParams = extractPolygonParams(params);
+    return {
+      id: options?.id ?? createNodeId(kind),
+      type: 'polygonField',
+      position,
+      data: {
+        title: template?.title ?? kind,
+        subtitle: template?.subtitle,
+        icon: template?.icon ?? '•',
+        tint: template?.tint ?? '#7ce6ff',
+        kind,
+        summary: summarizeNode(kind, params),
+        type: 'polygon-field',
+        params: polygonParams,
+        onChange: {
+          sides: (value) => options?.updateParam?.('flow.polygonSides', Math.round(value)),
+          radius: (value) => options?.updateParam?.('flow.circleRadius', value),
+          rotation: (value) => options?.updateParam?.('flow.polygonRotation', Math.round(value)),
+          radialMultiplier: (value) => options?.updateParam?.('flow.radialMultiplier', Math.round(value)),
+          showPolygon: (value) => options?.updateParam?.('flow.showPolygon', value),
+          showRadials: (value) => options?.updateParam?.('flow.showRadials', value),
+        },
+      },
+    };
+  }
+
   return {
     id: options?.id ?? createNodeId(kind),
     type: 'workflow',
@@ -1313,6 +1470,17 @@ function createNodeId(kind: WorkflowNodeKind): string {
     return `${kind}-${crypto.randomUUID()}`;
   }
   return `${kind}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function extractPolygonParams(params: ControllerParams) {
+  return {
+    sides: params.flow.polygonSides,
+    radius: params.flow.circleRadius,
+    rotation: params.flow.polygonRotation,
+    radialMultiplier: params.flow.radialMultiplier,
+    showPolygon: params.flow.showPolygon,
+    showRadials: params.flow.showRadials,
+  };
 }
 
 function summarizeNode(kind: WorkflowNodeKind, params: ControllerParams): string[] {

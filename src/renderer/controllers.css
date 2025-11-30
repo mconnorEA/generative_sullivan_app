@@ -339,6 +339,13 @@ body {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
+.node-card__body {
+  padding: 0.75rem 0.85rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
 .node-card__hdr {
   display: flex;
   align-items: center;
@@ -371,6 +378,31 @@ body {
 
 .node-card__summary li + li {
   margin-top: 0.2rem;
+}
+
+.node-card--polygon {
+  max-width: 320px;
+  width: 320px;
+}
+
+.polygon-node__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.polygon-node__outputs {
+  margin-top: 0.4rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.polygon-node__port {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .help {
