@@ -306,9 +306,14 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
           </ul>
         ) : null}
         <div className="node-card__body">
-          <div className="polygon-node__outputs" aria-label="Polygon outputs">
-            <div className="polygon-node__port">
-              <span className="polygon-node__port-label">Polygon verts</span>
+            <div className="polygon-node__outputs" aria-label="Polygon outputs">
+              <div className="polygon-node__port">
+              <span
+                className="polygon-node__port-label"
+                title="Ordered array of vertex positions on the base circle (one per polygon side)"
+              >
+                Polygon verts
+              </span>
               <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '58%' }} />
             </div>
             <div className="polygon-node__port">

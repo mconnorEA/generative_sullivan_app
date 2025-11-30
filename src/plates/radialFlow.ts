@@ -576,6 +576,7 @@ function buildRadialData(count: number, rotation: number, radius: number): Radia
 }
 
 function buildPolygonVertices(radius: number, sides: number, rotation: number): Vec2[] {
+  // Ordered vertex positions on the base circle; this is what the polygonVertices socket exposes.
   const vertices: Vec2[] = [];
   for (let i = 0; i < sides; i++) {
     const angle = rotation + (2 * Math.PI * i) / sides;
