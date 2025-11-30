@@ -385,6 +385,13 @@ body {
   width: 320px;
 }
 
+.polygon-node__inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
 .polygon-node__controls {
   display: flex;
   flex-direction: column;
@@ -400,14 +407,36 @@ body {
 .polygon-node__port {
   display: flex;
   align-items: center;
+  gap: 0.4rem;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--muted);
 }
 
 .polygon-node__port-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--muted);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.polygon-node__port--input {
+  justify-content: flex-start;
+}
+
+.polygon-node__port--input .polygon-node__port-label {
+  text-align: left;
+}
+
+.polygon-node__port--output {
+  justify-content: flex-end;
+}
+
+.polygon-node__port--output .polygon-node__port-label {
+  text-align: right;
+}
+
+.polygon-node__port .react-flow__handle {
+  position: static;
+  transform: none;
 }
 
 .help {

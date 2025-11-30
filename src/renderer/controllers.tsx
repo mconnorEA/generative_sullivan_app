@@ -298,36 +298,34 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
             {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
           </div>
         </div>
-        {data.summary?.length ? (
-          <ul className="node-card__summary">
-            {data.summary.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        ) : null}
         <div className="node-card__body">
-            <div className="polygon-node__outputs" aria-label="Polygon outputs">
-              <div className="polygon-node__port">
-              <span
+          <div className="polygon-node__inputs" aria-label="Polygon inputs">
+            <div className="polygon-node__port polygon-node__port--input">
+              <Handle type="target" position={Position.Left} id="polygon-field-input" />
+              <div className="polygon-node__port-label">Input</div>
+            </div>
+          </div>
+          <div className="polygon-node__outputs" aria-label="Polygon outputs">
+            <div className="polygon-node__port polygon-node__port--output">
+              <div
                 className="polygon-node__port-label"
                 title="Ordered array of vertex positions on the base circle (one per polygon side)"
               >
                 Polygon verts
-              </span>
-              <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '58%' }} />
+              </div>
+              <Handle type="source" position={Position.Right} id="polygonVertices" />
             </div>
-            <div className="polygon-node__port">
-              <span className="polygon-node__port-label">Edges</span>
-              <Handle type="source" position={Position.Right} id="edges" style={{ top: '72%' }} />
+            <div className="polygon-node__port polygon-node__port--output">
+              <div className="polygon-node__port-label">Edges</div>
+              <Handle type="source" position={Position.Right} id="edges" />
             </div>
-            <div className="polygon-node__port">
-              <span className="polygon-node__port-label">Radials</span>
-              <Handle type="source" position={Position.Right} id="radials" style={{ top: '86%' }} />
+            <div className="polygon-node__port polygon-node__port--output">
+              <div className="polygon-node__port-label">Radials</div>
+              <Handle type="source" position={Position.Right} id="radials" />
             </div>
           </div>
         </div>
       </div>
-      <Handle type="target" position={Position.Left} id="polygon-field-input" />
     </>
   );
 }
