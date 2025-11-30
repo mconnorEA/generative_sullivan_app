@@ -298,37 +298,57 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
             {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
           </div>
         </div>
-        <div className="node-card__body">
-          <div className="polygon-node__inputs" aria-label="Polygon inputs">
-            <div className="polygon-node__port polygon-node__port--input">
-              <Handle type="target" position={Position.Left} id="polygon-field-input" />
-              <div className="polygon-node__port-label">Input</div>
-            </div>
-          </div>
-          <div className="polygon-node__outputs" aria-label="Polygon outputs">
-            <div className="polygon-node__port polygon-node__port--output">
-              <div
-                className="polygon-node__port-label"
-                title="Ordered array of vertex positions on the base circle (one per polygon side)"
-              >
-                Polygon verts
+          <div className="node-card__body">
+            <div className="polygon-node__inputs" aria-label="Polygon inputs">
+              <div className="polygon-node__port polygon-node__port--input">
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id="polygon-field-input"
+                  className="polygon-node__handle polygon-node__handle--input"
+                />
+                <div className="polygon-node__port-label">Input</div>
               </div>
-              <Handle type="source" position={Position.Right} id="polygonVertices" />
             </div>
-            <div className="polygon-node__port polygon-node__port--output">
-              <div className="polygon-node__port-label">Edges</div>
-              <Handle type="source" position={Position.Right} id="edges" />
-            </div>
-            <div className="polygon-node__port polygon-node__port--output">
-              <div className="polygon-node__port-label">Radials</div>
-              <Handle type="source" position={Position.Right} id="radials" />
+            <div className="polygon-node__outputs" aria-label="Polygon outputs">
+              <div className="polygon-node__port polygon-node__port--output">
+                <div
+                  className="polygon-node__port-label"
+                  title="Ordered array of vertex positions on the base circle (one per polygon side)"
+                >
+                  Polygon verts
+                </div>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id="polygonVertices"
+                  className="polygon-node__handle polygon-node__handle--output"
+                />
+              </div>
+              <div className="polygon-node__port polygon-node__port--output">
+                <div className="polygon-node__port-label">Edges</div>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id="edges"
+                  className="polygon-node__handle polygon-node__handle--output"
+                />
+              </div>
+              <div className="polygon-node__port polygon-node__port--output">
+                <div className="polygon-node__port-label">Radials</div>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id="radials"
+                  className="polygon-node__handle polygon-node__handle--output"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </>
-  );
-}
+      </>
+    );
+  }
 
 function App(): JSX.Element {
   const initialNodes = useMemo(() => buildInitialNodes(defaultControllerParams), []);
