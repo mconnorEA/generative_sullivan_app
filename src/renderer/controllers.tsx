@@ -52,21 +52,10 @@ type NodeBlueprint = {
   position: { x: number; y: number };
 };
 
-type NodeSpec = {
-  name: string;
-  inputs?: string[];
-  params?: string[];
-  outputs?: string[];
-};
-
-type NodeLibraryEntry =
-  | { type: 'blueprint'; blueprint: NodeBlueprint }
-  | { type: 'spec'; spec: NodeSpec };
-
 type NodeLibraryGroup = {
   title: string;
   subtitle?: string;
-  entries: NodeLibraryEntry[];
+  entries: NodeBlueprint[];
 };
 
 const nodeBlueprints: NodeBlueprint[] = [
@@ -90,7 +79,7 @@ const nodeBlueprints: NodeBlueprint[] = [
   },
   {
     id: 'stage-circle',
-    title: 'Circle Scaffold',
+    title: 'Circle Field',
     subtitle: 'Circle + cross',
     icon: 'C',
     tint: '#38bdf8',
@@ -158,43 +147,13 @@ const blueprintByKind = nodeBlueprints.reduce<Record<WorkflowNodeKind, NodeBluep
   return map;
 }, {} as Record<WorkflowNodeKind, NodeBlueprint>);
 
-const symmetryNodeSpecs: NodeSpec[] = [
-  {
-    name: 'CircleField',
-    inputs: ['center', 'radius'],
-    params: ['radialCount', 'showPolygon (bool)'],
-    outputs: ['Points (center + perimeter sample points)', 'Lines (rays, diameter lines, polygon edges)'],
-  },
-  {
-    name: 'PolygonField',
-    params: ['sides', 'radius', 'rotation'],
-    outputs: ['Polygon vertices', 'Edges', 'Diagonals'],
-  },
-  {
-    name: 'AxisField',
-    params: ['Number of main axes (N/S/E/W, diagonals, etc.)'],
-    outputs: ['Used for those stacked crosses of squares.'],
-  },
-  {
-    name: 'SymmetryNode',
-    inputs: ['Geometry'],
-    params: ['rotationCount', 'Optional mirror flags'],
-    outputs: ['Geometry replicated around center.'],
-  },
-];
-
 const nodeLibraryEntries = Object.values(blueprintByKind);
 
 const nodeLibraryGroups: NodeLibraryGroup[] = [
   {
     title: 'Workflow stages',
     subtitle: 'Drag or click to add new stages',
-    entries: nodeLibraryEntries.map((entry) => ({ type: 'blueprint', blueprint: entry })),
-  },
-  {
-    title: 'Field / Symmetry nodes (the “energy containers”)',
-    subtitle: 'These create the basic circle/polygon + radial structure.',
-    entries: symmetryNodeSpecs.map((spec) => ({ type: 'spec', spec })),
+    entries: nodeLibraryEntries,
   },
 ];
 
@@ -591,7 +550,7 @@ function App(): JSX.Element {
     lines.push(
       `Square motifs: ${countToggled(params.square)} enabled / 8, subdivisions ${params.square.subdivisions}`
     );
-    lines.push(`Circle radius ${params.flow.circleRadius.toFixed(2)} with ${params.flow.polygonSides}-gon dividers`);
+    lines.push(`Radius ${params.flow.circleRadius.toFixed(2)} with ${params.flow.polygonSides}-gon dividers`);
     lines.push(
       params.flow.enablePush
         ? `Push motif "${params.flow.pushMotif}" @ ${params.flow.pushAmount.toFixed(2)}`
@@ -829,42 +788,25 @@ function NodeLibrary({ open, groups, onClose, onAdd }: NodeLibraryProps) {
                 {group.subtitle ? <div className="node-library__group-subtitle">{group.subtitle}</div> : null}
               </div>
               <div className="node-library__items">
-                {group.entries.map((entry) => {
-                  if (entry.type === 'blueprint') {
-                    const node = entry.blueprint;
-                    return (
-                      <div
-                        key={node.kind}
-                        className="node-library__item"
-                        draggable
-                        onDragStart={(event) => dragStart(event, node.kind)}
-                      >
-                        <div className="node-library__icon" style={{ color: node.tint }}>
-                          {node.icon}
-                        </div>
-                        <div className="node-library__meta">
-                          <div className="node-library__name">{node.title}</div>
-                          {node.subtitle && <div className="node-library__hint">{node.subtitle}</div>}
-                        </div>
-                        <button className="btn btn--small" onClick={() => onAdd(node.kind)}>
-                          Add
-                        </button>
-                      </div>
-                    );
-                  }
-
-                  const { spec } = entry;
-                  return (
-                    <div key={spec.name} className="node-library__spec">
-                      <div className="node-library__spec-name">{spec.name}</div>
-                      <div className="node-library__spec-grid">
-                        {spec.inputs?.length ? <InfoList title="Inputs" items={spec.inputs} /> : null}
-                        {spec.params?.length ? <InfoList title="Params" items={spec.params} /> : null}
-                        {spec.outputs?.length ? <InfoList title="Outputs" items={spec.outputs} /> : null}
-                      </div>
+                {group.entries.map((node) => (
+                  <div
+                    key={node.kind}
+                    className="node-library__item"
+                    draggable
+                    onDragStart={(event) => dragStart(event, node.kind)}
+                  >
+                    <div className="node-library__icon" style={{ color: node.tint }}>
+                      {node.icon}
                     </div>
-                  );
-                })}
+                    <div className="node-library__meta">
+                      <div className="node-library__name">{node.title}</div>
+                      {node.subtitle && <div className="node-library__hint">{node.subtitle}</div>}
+                    </div>
+                    <button className="btn btn--small" onClick={() => onAdd(node.kind)}>
+                      Add
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -943,7 +885,7 @@ function renderFields(
       return (
         <>
           <RangeField
-            label="Circle radius"
+            label="Radius"
             value={params.flow.circleRadius}
             min={0.3}
             max={0.95}
@@ -963,11 +905,13 @@ function renderFields(
               onChange={(value) => updateParam('flow.showCross', value)}
             />
           </div>
-          <InfoGroup
-            title="Field / Symmetry nodes (the “energy containers”)"
-            subtitle="These create the basic circle/polygon + radial structure."
-            items={symmetryNodeSpecs}
-          />
+          <div className="info-list">
+            <div className="info-list__title">Outputs</div>
+            <ul>
+              <li>Points (center + perimeter sample points)</li>
+              <li>Lines (rays, diameter lines, polygon edges)</li>
+            </ul>
+          </div>
         </>
       );
     case 'polygon':
@@ -1201,42 +1145,6 @@ function renderFields(
     default:
       return null;
   }
-}
-
-function InfoGroup({ title, subtitle, items }: { title: string; subtitle?: string; items: NodeSpec[] }) {
-  return (
-    <div className="info-group">
-      <div>
-        <div className="info-group__title">{title}</div>
-        {subtitle && <div className="info-group__subtitle">{subtitle}</div>}
-      </div>
-      <div className="info-group__items">
-        {items.map((item) => (
-          <div key={item.name} className="info-card">
-            <div className="info-card__name">{item.name}</div>
-            <div className="info-card__grid">
-              {item.inputs?.length ? <InfoList title="Inputs" items={item.inputs} /> : null}
-              {item.params?.length ? <InfoList title="Params" items={item.params} /> : null}
-              {item.outputs?.length ? <InfoList title="Outputs" items={item.outputs} /> : null}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function InfoList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="info-list">
-      <div className="info-list__title">{title}</div>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 function RangeField({
