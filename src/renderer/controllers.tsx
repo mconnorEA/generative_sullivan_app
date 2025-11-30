@@ -88,8 +88,8 @@ const nodeBlueprints: NodeBlueprint[] = [
   },
   {
     id: 'stage-polygon',
-    title: 'Polygon Dividers',
-    subtitle: 'Sides + rotation',
+    title: 'Polygon Field',
+    subtitle: 'Vertices + radials',
     icon: 'P',
     tint: '#60a5fa',
     kind: 'polygon',
@@ -210,6 +210,7 @@ const summaryBuilders: Record<WorkflowNodeKind, (params: ControllerParams) => st
     `Rotation ${params.flow.polygonRotation}°`,
     `Radials ×${params.flow.radialMultiplier}`,
     params.flow.showPolygon ? 'Polygon visible' : 'Polygon hidden',
+    params.flow.showRadials ? 'Radials visible' : 'Radials hidden',
   ],
   energy: (params) => [
     params.flow.enablePush ? `Push ${params.flow.pushAmount.toFixed(2)} (${params.flow.pushMotif})` : 'Push disabled',
@@ -957,6 +958,14 @@ function renderFields(
               checked={params.flow.showRadials}
               onChange={(value) => updateParam('flow.showRadials', value)}
             />
+          </div>
+          <div className="info-list">
+            <div className="info-list__title">Outputs</div>
+            <ul>
+              <li>Polygon vertices (circle touch points)</li>
+              <li>Edges (lines between vertices)</li>
+              <li>Radials (symmetry energy lines)</li>
+            </ul>
           </div>
         </>
       );
