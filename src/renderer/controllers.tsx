@@ -298,30 +298,23 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
             {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
           </div>
         </div>
-        {data.summary?.length ? (
-          <ul className="node-card__summary">
-            {data.summary.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        ) : null}
         <div className="node-card__body">
-            <div className="polygon-node__outputs" aria-label="Polygon outputs">
-              <div className="polygon-node__port">
-              <span
+          <div className="polygon-node__outputs" aria-label="Polygon outputs">
+            <div className="polygon-node__port">
+              <div
                 className="polygon-node__port-label"
                 title="Ordered array of vertex positions on the base circle (one per polygon side)"
               >
                 Polygon verts
-              </span>
+              </div>
               <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '58%' }} />
             </div>
             <div className="polygon-node__port">
-              <span className="polygon-node__port-label">Edges</span>
+              <div className="polygon-node__port-label">Edges</div>
               <Handle type="source" position={Position.Right} id="edges" style={{ top: '72%' }} />
             </div>
             <div className="polygon-node__port">
-              <span className="polygon-node__port-label">Radials</span>
+              <div className="polygon-node__port-label">Radials</div>
               <Handle type="source" position={Position.Right} id="radials" style={{ top: '86%' }} />
             </div>
           </div>
