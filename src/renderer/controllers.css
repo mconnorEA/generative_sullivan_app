@@ -405,6 +405,11 @@ body {
   color: var(--muted);
 }
 
+.polygon-node__port-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .help {
   color: var(--muted);
   font-size: 0.8rem;

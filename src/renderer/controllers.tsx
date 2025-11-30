@@ -286,12 +286,6 @@ function WorkflowNode({ data }: { data: WorkflowNodeData }) {
 }
 
 function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
-  const { params, onChange } = data;
-  const snapRotation = useCallback(
-    (value: number) => snapRotationToSymmetry(value, params.sides, 1, 0, 360),
-    [params.sides]
-  );
-
   return (
     <>
       <div className="node-card node-card--polygon" style={{ borderColor: data.tint }}>
@@ -304,67 +298,26 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
             {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
           </div>
         </div>
+        {data.summary?.length ? (
+          <ul className="node-card__summary">
+            {data.summary.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
         <div className="node-card__body">
-          <div className="polygon-node__controls">
-            <RangeField
-              label="Sides"
-              value={params.sides}
-              min={3}
-              max={18}
-              step={1}
-              onChange={(value) => onChange.sides(Math.round(value))}
-            />
-            <RangeField
-              label="Radius"
-              value={params.radius}
-              min={0.25}
-              max={0.95}
-              step={0.01}
-              onChange={(value) => onChange.radius(parseFloat(value.toFixed(2)))}
-              format={(value) => value.toFixed(2)}
-            />
-            <RangeField
-              label="Rotation"
-              value={params.rotation}
-              min={0}
-              max={360}
-              step={1}
-              onChange={(value) => onChange.rotation(Math.round(value))}
-              onShiftSnap={snapRotation}
-              format={(value) => `${value}°`}
-            />
-            <RangeField
-              label="Radial multiplier"
-              value={params.radialMultiplier}
-              min={1}
-              max={6}
-              step={1}
-              onChange={(value) => onChange.radialMultiplier(Math.round(value))}
-              format={(value) => `×${value}`}
-            />
-            <ToggleField
-              label="Show polygon"
-              checked={params.showPolygon}
-              onChange={onChange.showPolygon}
-            />
-            <ToggleField
-              label="Show radial lines"
-              checked={params.showRadials}
-              onChange={onChange.showRadials}
-            />
-          </div>
           <div className="polygon-node__outputs" aria-label="Polygon outputs">
             <div className="polygon-node__port">
-              <span>polygonVertices</span>
-              <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '55%' }} />
+              <span className="polygon-node__port-label">Polygon verts</span>
+              <Handle type="source" position={Position.Right} id="polygonVertices" style={{ top: '58%' }} />
             </div>
             <div className="polygon-node__port">
-              <span>edges</span>
-              <Handle type="source" position={Position.Right} id="edges" style={{ top: '70%' }} />
+              <span className="polygon-node__port-label">Edges</span>
+              <Handle type="source" position={Position.Right} id="edges" style={{ top: '72%' }} />
             </div>
             <div className="polygon-node__port">
-              <span>radials</span>
-              <Handle type="source" position={Position.Right} id="radials" style={{ top: '85%' }} />
+              <span className="polygon-node__port-label">Radials</span>
+              <Handle type="source" position={Position.Right} id="radials" style={{ top: '86%' }} />
             </div>
           </div>
         </div>
@@ -1087,14 +1040,6 @@ function renderFields(
               checked={params.flow.showRadials}
               onChange={(value) => updateParam('flow.showRadials', value)}
             />
-          </div>
-          <div className="info-list">
-            <div className="info-list__title">Outputs</div>
-            <ul>
-              <li>Polygon vertices (circle touch points)</li>
-              <li>Edges (lines between vertices)</li>
-              <li>Radials (symmetry energy lines)</li>
-            </ul>
           </div>
         </>
       );
