@@ -9,7 +9,8 @@ export type WorkflowNodeKind =
   | 'subcenter'
   | 'ornament'
   | 'layers'
-  | 'leaf';
+  | 'leaf'
+  | 'debug';
 
 export interface WorkflowNodeSnapshot {
   id: string;

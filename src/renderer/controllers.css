@@ -320,6 +320,32 @@ body {
   gap: 0.2rem;
 }
 
+.node-card__body--debug {
+  padding: 0.75rem 0.9rem;
+  background: rgba(244, 114, 182, 0.08);
+  border-top: 1px solid var(--line);
+}
+
+.debug-node__label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.debug-node__value {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.debug-node__handle {
+  width: 14px;
+  height: 14px;
+  background: #f472b6;
+  border: 2px solid #2a2030;
+}
+
 .log {
   border: 1px dashed var(--line);
   border-radius: 0.9rem;
@@ -448,6 +474,29 @@ body {
 .help {
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.debug-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.debug-readout__label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.debug-readout__value {
+  border: 1px dashed var(--line);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(6, 10, 18, 0.85);
+  font-family: 'SFMono-Regular', Consolas, ui-monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .react-flow__attribution {
