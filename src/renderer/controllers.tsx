@@ -286,10 +286,15 @@ function WorkflowNode({ data }: { data: WorkflowNodeData }) {
 }
 
 function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
+  const polygonStyle: React.CSSProperties = {
+    borderColor: data.tint,
+    ['--polygon-accent' as string]: data.tint,
+  };
+
   return (
     <>
-      <div className="node-card node-card--polygon" style={{ borderColor: data.tint }}>
-        <div className="node-card__hdr" style={{ background: `${data.tint}22` }}>
+      <div className="node-card node-card--polygon" style={polygonStyle}>
+        <div className="node-card__hdr">
           <span className="node-card__icon" style={{ color: data.tint }}>
             {data.icon}
           </span>
@@ -316,7 +321,7 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
                   className="polygon-node__port-label"
                   title="Ordered array of vertex positions on the base circle (one per polygon side)"
                 >
-                  Polygon verts
+                  Verts
                 </div>
                 <Handle
                   type="source"
