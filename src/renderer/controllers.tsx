@@ -56,7 +56,12 @@ type PolygonFieldNodeData = WorkflowNodeData & {
   };
 };
 
-type NodeData = WorkflowNodeData | PolygonFieldNodeData;
+type DebugNodeData = WorkflowNodeData & {
+  type: 'debug';
+  input: string;
+};
+
+type NodeData = WorkflowNodeData | PolygonFieldNodeData | DebugNodeData;
 
 type WorkflowSnapshot = {
   params: ControllerParams;
@@ -162,6 +167,15 @@ const nodeBlueprints: NodeBlueprint[] = [
     kind: 'leaf',
     position: { x: 500, y: 300 },
   },
+  {
+    id: 'stage-debug',
+    title: 'Debug',
+    subtitle: 'Inspect payloads',
+    icon: '🐞',
+    tint: '#f472b6',
+    kind: 'debug',
+    position: { x: 740, y: 320 },
+  },
 ];
 
 const blueprintByKind = nodeBlueprints.reduce<Record<WorkflowNodeKind, NodeBlueprint>>((map, blueprint) => {
@@ -182,7 +196,10 @@ const nodeLibraryGroups: NodeLibraryGroup[] = [
 const nodeTypes = {
   workflow: WorkflowNode,
   polygonField: PolygonFieldNode,
+  debug: DebugNode,
 };
+
+const DEFAULT_DEBUG_INPUT = 'Awaiting input';
 
 const panelResetMap: Record<WorkflowNodeKind, string[]> = {
   preset: ['step'],
@@ -214,6 +231,7 @@ const panelResetMap: Record<WorkflowNodeKind, string[]> = {
   ],
   layers: ['flow.showStructuralLayer', 'flow.showOrnamentLayer'],
   leaf: ['leafMorphAlpha'],
+  debug: [],
 };
 
 const summaryBuilders: Record<WorkflowNodeKind, (params: ControllerParams) => string[]> = {
@@ -256,6 +274,7 @@ const summaryBuilders: Record<WorkflowNodeKind, (params: ControllerParams) => st
     params.flow.showOrnamentLayer ? 'Ornament layer on' : 'Ornament layer off',
   ],
   leaf: (params) => [`Morph α ${(params.leafMorphAlpha * 100).toFixed(0)}%`],
+  debug: () => ['Awaiting input'],
 };
 
 function WorkflowNode({ data }: { data: WorkflowNodeData }) {
@@ -355,6 +374,33 @@ function PolygonFieldNode({ data }: { data: PolygonFieldNodeData }) {
     );
   }
 
+function DebugNode({ data }: { data: DebugNodeData }) {
+  const message = data.input || DEFAULT_DEBUG_INPUT;
+
+  return (
+    <>
+      <div className="node-card node-card--debug" style={{ borderColor: data.tint }}>
+        <div className="node-card__hdr" style={{ background: `${data.tint}22` }}>
+          <span className="node-card__icon" style={{ color: data.tint }}>
+            {data.icon}
+          </span>
+          <div className="node-card__meta">
+            <div className="node-card__title">{data.title}</div>
+            {data.subtitle && <div className="node-card__subtitle">{data.subtitle}</div>}
+          </div>
+        </div>
+        <div className="node-card__body node-card__body--debug">
+          <div className="debug-node__label">Incoming</div>
+          <div className="debug-node__value" title={message} aria-live="polite">
+            {message}
+          </div>
+        </div>
+      </div>
+      <Handle type="target" position={Position.Left} id="input" className="debug-node__handle" />
+    </>
+  );
+}
+
 function App(): JSX.Element {
   const initialNodes = useMemo(() => buildInitialNodes(defaultControllerParams), []);
   const initialEdges = useMemo(() => buildInitialEdges(), []);
@@ -387,6 +433,9 @@ function App(): JSX.Element {
     (nextParams: ControllerParams) => {
       setNodes((current) =>
         current.map((node) => {
+          if (node.data.kind === 'debug') {
+            return node;
+          }
           if (node.type === 'polygonField') {
             const data = node.data as PolygonFieldNodeData;
             return {
@@ -737,6 +786,10 @@ function App(): JSX.Element {
     setStatus(`Updated ${new Date().toLocaleTimeString()}`);
   }, [params, updateNodeSummaries]);
 
+  useEffect(() => {
+    setNodes((current) => applyDebugInputs(current, edges));
+  }, [edges, setNodes]);
+
   const onSelectionChange = useCallback((sel: OnSelectionChangeParams) => {
     setSelectedId(sel?.nodes?.[0]?.id ?? null);
   }, []);
@@ -859,7 +912,7 @@ function PropertyPanel({
         </button>
       </div>
       <div className="panel__body">
-        {renderFields(kind, params, updateParam, updateStep)}
+        {renderFields(kind, params, updateParam, updateStep, node)}
       </div>
     </div>
   );
@@ -931,7 +984,8 @@ function renderFields(
   kind: WorkflowNodeKind,
   params: ControllerParams,
   updateParam: (path: string, value: boolean | number | string) => void,
-  updateStep: (value: number) => void
+  updateStep: (value: number) => void,
+  node?: Node<NodeData>
 ): JSX.Element | null {
   switch (kind) {
     case 'preset':
@@ -1253,8 +1307,98 @@ function renderFields(
           format={(value) => `${Math.round(value * 100)}%`}
         />
       );
+    case 'debug': {
+      const debugData = node?.data as DebugNodeData | undefined;
+      const message = debugData?.input ?? DEFAULT_DEBUG_INPUT;
+
+      return (
+        <div className="debug-readout">
+          <div className="debug-readout__label">Incoming payload</div>
+          <pre className="debug-readout__value" aria-live="polite">
+            {message}
+          </pre>
+          <small className="help">Connect an output to view the forwarded payload here.</small>
+        </div>
+      );
+    }
     default:
       return null;
+  }
+}
+
+function applyDebugInputs(nodes: Node<NodeData>[], edges: Array<Connection | Edge>): Node<NodeData>[] {
+  if (!nodes.length) {
+    return nodes;
+  }
+
+  const targetInputs = new Map<string, string>();
+
+  edges.forEach((edge) => {
+    if (!edge.target) {
+      return;
+    }
+    targetInputs.set(edge.target, formatDebugPayload(edge));
+  });
+
+  let changed = false;
+
+  const nextNodes = nodes.map((node) => {
+    if (node.type !== 'debug') {
+      return node;
+    }
+
+    const data = node.data as DebugNodeData;
+    const nextInput = targetInputs.get(node.id) ?? DEFAULT_DEBUG_INPUT;
+
+    if (nextInput === data.input) {
+      return node;
+    }
+
+    changed = true;
+    return {
+      ...node,
+      data: {
+        ...data,
+        input: nextInput,
+        summary: [`Input: ${nextInput}`],
+      },
+    };
+  });
+
+  return changed ? nextNodes : nodes;
+}
+
+function formatDebugPayload(connection: Connection | Edge): string {
+  const rawPayload = (connection as any)?.data?.payload ?? (connection as any)?.data;
+  if (rawPayload !== undefined) {
+    return formatDebugValue(rawPayload);
+  }
+
+  if ('source' in connection && connection.source) {
+    const handle = 'sourceHandle' in connection && connection.sourceHandle ? `.${connection.sourceHandle}` : '';
+    return `${connection.source}${handle}`;
+  }
+
+  return 'Input received';
+}
+
+function formatDebugValue(value: unknown): string {
+  if (value === null) {
+    return 'null';
+  }
+  if (value === undefined) {
+    return DEFAULT_DEBUG_INPUT;
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    return String(value);
   }
 }
 
@@ -1395,6 +1539,24 @@ function createNode(
 ): Node<NodeData> {
   const template = blueprintByKind[kind];
   const position = options?.position ?? { ...(template?.position ?? { x: 0, y: 0 }) };
+
+  if (kind === 'debug') {
+    return {
+      id: options?.id ?? createNodeId(kind),
+      type: 'debug',
+      position,
+      data: {
+        title: template?.title ?? kind,
+        subtitle: template?.subtitle,
+        icon: template?.icon ?? '🐞',
+        tint: template?.tint ?? '#f472b6',
+        kind,
+        summary: [`Input: ${DEFAULT_DEBUG_INPUT}`],
+        type: 'debug',
+        input: DEFAULT_DEBUG_INPUT,
+      },
+    };
+  }
 
   if (kind === 'polygon') {
     const polygonParams = extractPolygonParams(params);
